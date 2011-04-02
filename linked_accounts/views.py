@@ -16,7 +16,7 @@ class AuthCallback(object):
                 profile.user = request.user
                 profile.save()
         else:
-            user = auth.authenticate(service=service, token=token)
-            if user:
-                auth.login(request, user)
+            profile = auth.authenticate(service=service, token=token)
+            if profile.user:
+                auth.login(request, profile.user)
         return HttpResponseRedirect(next)
