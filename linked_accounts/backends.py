@@ -10,3 +10,4 @@ class LinkedAccountsBackend(object):
 
     def authenticate(self, service=None, token=None):
         profile = get_profile(service, token)
+        return profile
