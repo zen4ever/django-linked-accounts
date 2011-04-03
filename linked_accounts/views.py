@@ -26,10 +26,16 @@ class AuthCallback(object):
             if not profile.user:
                 profile.user = request.user
                 profile.save()
+            access.persist(request.user,
+                           token,
+                           identifier="auth")
         else:
             profile = auth.authenticate(service=service, token=token)
             if profile.user:
                 auth.login(request, profile.user)
+                access.persist(profile.user,
+                               token,
+                               identifier="auth")
             else:
                 request.session[LINKED_ACCOUNTS_ID_SESSION] = profile.id
                 return HttpResponseRedirect(
