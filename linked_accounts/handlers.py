@@ -58,3 +58,21 @@ class GoogleHandler(AuthHandler):
     service = "google"
     profile_url = "https://www.google.com/m8/feeds/contacts/default/full?max-results=0&alt=json"
     identifier_name = ["feed", "id", "$t"]
+
+
+class YahooHandler(AuthHandler):
+    service = "yahoo"
+    profile_url = "http://social.yahooapis.com/v1/me/guid"
+    identifier_name = ["guid", "value"]
+
+    def get_profile(self, token, **kwargs):
+        account = super(YahooHandler, self).get_profile(token, **kwargs)
+        access = self.get_access()
+        api_response = access.make_api_call(
+            "raw",
+            "http://social.yahooapis.com/v1/user/%s/profile" % account.identifier,
+            token
+        )
+        account.api_response = api_response
+        account.save()
+        return account
