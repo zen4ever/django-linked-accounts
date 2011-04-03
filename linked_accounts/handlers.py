@@ -19,8 +19,14 @@ class AuthHandler(object):
         access = self.get_access()
         api_response = access.make_api_call("raw", self.profile_url, token)
         profile = json.loads(api_response)
+        if isinstance(self.identifier_name, list):
+            identifier = profile
+            for name in self.identifier_name:
+                identifier = identifier[name]
+        else:
+            identifier = profile[self.identifier_name]
         account, created = LinkedAccount.objects.get_or_create(
-            identifier = profile[self.identifier_name],
+            identifier = identifier,
             service = self.service
         )
         if created:
@@ -46,3 +52,9 @@ class FacebookHandler(AuthHandler):
             expires=(token.expires - datetime.now()).seconds
         )
         return super(FacebookHandler, self).get_profile(token, **kwargs)
+
+
+class GoogleHandler(AuthHandler):
+    service = "google"
+    profile_url = "https://www.google.com/m8/feeds/contacts/default/full?max-results=0&alt=json"
+    identifier_name = ["feed", "id", "$t"]
