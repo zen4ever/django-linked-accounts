@@ -44,6 +44,11 @@ class AuthCallback(object):
         return HttpResponseRedirect(next)
 
 
+def oauth_access_success(request, access, token):
+    callback = AuthCallback()
+    return callback(request, access, token)
+
+
 def register(request, template_name="linked_accounts/registration.html"):
     next = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
     
