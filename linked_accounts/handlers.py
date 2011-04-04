@@ -62,7 +62,7 @@ class GoogleHandler(AuthHandler):
 
 class YahooHandler(AuthHandler):
     service = "yahoo"
-    profile_url = "http://social.yahooapis.com/v1/me/guid"
+    profile_url = "http://social.yahooapis.com/v1/me/guid&format=json"
     identifier_name = ["guid", "value"]
 
     def get_profile(self, token, **kwargs):
@@ -70,7 +70,7 @@ class YahooHandler(AuthHandler):
         access = self.get_access()
         api_response = access.make_api_call(
             "raw",
-            "http://social.yahooapis.com/v1/user/%s/profile" % account.identifier,
+            "http://social.yahooapis.com/v1/user/%s/profile&format=json" % account.identifier,
             token
         )
         account.api_response = api_response
