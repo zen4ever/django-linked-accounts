@@ -19,6 +19,6 @@ def get_profile(service=None, token=None):
         handler_class = getattr(import_module(module), handler)
         handler = handler_class()
         profile = handler.get_profile(token)
-        return profile.user
+        return profile
     else:
         raise ImproperlyConfigured('No handler for service %s' % service)
