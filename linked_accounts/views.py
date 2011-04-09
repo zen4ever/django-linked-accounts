@@ -19,7 +19,7 @@ LINKED_ACCOUNTS_ID_SESSION = getattr(
 
 class AuthCallback(object):
     def __call__(self, request, access, token):
-        next = request.POST.get('next', settings.LOGIN_REDIRECT_URL)
+        next_url = request.session.get('oauth_next', settings.LOGIN_REDIRECT_URL)
         service = access.service
         if request.user.is_authenticated():
             profile = get_profile(service=service, token=token)
@@ -39,7 +39,7 @@ class AuthCallback(object):
             else:
                 request.session[LINKED_ACCOUNTS_ID_SESSION] = profile.id
                 return HttpResponseRedirect(
-                    reverse('linked_accounts_register') + "?next=%s" % next
+                    reverse('linked_accounts_register') + "?next=%s" % next_url
                 )
         return HttpResponseRedirect(next)
 
