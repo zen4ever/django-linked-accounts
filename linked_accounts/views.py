@@ -16,10 +16,16 @@ LINKED_ACCOUNTS_ID_SESSION = getattr(
     '_linked_acccount_id'
 )
 
+LINKED_ACCOUNTS_NEXT_KEY = getattr(
+    settings,
+    'LINKED_ACCOUNTS_NEXT_KEY',
+    'oauth_next'
+)
+
 
 class AuthCallback(object):
     def __call__(self, request, access, token):
-        next_url = request.session.get('oauth_next', settings.LOGIN_REDIRECT_URL)
+        next_url = request.session.get(LINKED_ACCOUNTS_NEXT_KEY, settings.LOGIN_REDIRECT_URL)
         service = access.service
         if request.user.is_authenticated():
             profile = get_profile(service=service, token=token)
@@ -47,6 +53,12 @@ class AuthCallback(object):
 def oauth_access_success(request, access, token):
     callback = AuthCallback()
     return callback(request, access, token)
+
+
+def login(request, template_name="linked_accounts/login.html"):
+    next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
+    request.session[LINKED_ACCOUNTS_NEXT_KEY] = next_url
+    return direct_to_template(request, template_name)
 
 
 def register(request, template_name="linked_accounts/registration.html"):
