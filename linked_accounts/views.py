@@ -48,7 +48,7 @@ class AuthCallback(object):
                 return HttpResponseRedirect(
                     reverse('linked_accounts_register') + "?next=%s" % next_url
                 )
-        return HttpResponseRedirect(next)
+        return HttpResponseRedirect(next_url)
 
 
 def oauth_access_success(request, access, token):
