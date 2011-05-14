@@ -1,10 +1,27 @@
 from datetime import datetime
 
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.utils import simplejson as json
+from django.utils.importlib import import_module
 
 from oauth_access.access import OAuthAccess, OAuth20Token
 
 from linked_accounts.models import LinkedAccount
+
+
+LINKED_ACCOUNTS_HANDLERS = (
+    ('facebook', 'linked_accounts.handlers.FacebookHandler'),
+    ('twitter', 'linked_accounts.handlers.TwitterHandler'),
+    ('google', 'linked_accounts.handlers.GoogleHandler'),
+    ('yahoo', 'linked_accounts.handlers.YahooHandler'),
+)
+
+HANDLERS = getattr(
+    settings,
+    'LINKED_ACCOUNTS_HANDLERS',
+    LINKED_ACCOUNTS_HANDLERS
+)
 
 
 class AuthHandler(object):
@@ -33,6 +50,16 @@ class AuthHandler(object):
             account.api_response = api_response
             account.save()
         return account
+
+    @classmethod
+    def get_handler(cls, service):
+        handler_module = dict(HANDLERS).get(service, None)
+        if handler_module:
+            module, handler = handler_module.rsplit('.', 1)
+            handler_class = getattr(import_module(module), handler)
+            handler_instance = handler_class()
+            return handler_instance
+        raise ImproperlyConfigured('No handler for service %s' % service)
 
 
 class TwitterHandler(AuthHandler):

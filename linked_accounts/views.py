@@ -6,7 +6,7 @@ from django.views.generic.simple import direct_to_template
 import django.contrib.auth as auth
 
 from linked_accounts.models import LinkedAccount
-from linked_accounts.utils import get_profile
+from linked_accounts.handlers import AuthHandler
 from linked_accounts.forms import RegisterForm
 
 
@@ -28,7 +28,7 @@ class AuthCallback(object):
         next_url = request.session.get(LINKED_ACCOUNTS_NEXT_KEY, settings.LOGIN_REDIRECT_URL)
         service = access.service
         if request.user.is_authenticated():
-            profile = get_profile(service=service, token=token)
+            profile = AuthHandler.get_handler(service).get_profile(token)
             if not profile.user:
                 profile.user = request.user
                 profile.save()

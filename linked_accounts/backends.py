@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
-
-from linked_accounts.utils import get_profile
+from linked_accounts.handlers import AuthHandler
 
 
 class LinkedAccountsBackend(object):
@@ -9,5 +8,4 @@ class LinkedAccountsBackend(object):
         return User.objects.get(id=user_id)
 
     def authenticate(self, service=None, token=None):
-        profile = get_profile(service, token)
-        return profile
+        return AuthHandler.get_handler(service).get_profile(token)
