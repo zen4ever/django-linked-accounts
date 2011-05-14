@@ -28,9 +28,9 @@ class LinkedAccount(models.Model):
     def email(self):
         data = self.api_response_data
         result = {
-            "facebook": lambda x: x["email"],
-            "yahoo": lambda x: x['email'],
-            "google": lambda x: x["email"],
+            "facebook": lambda x: x.get("email", None),
+            "yahoo": lambda x: x.get('email', None),
+            "google": lambda x: x.get("email", None),
         }.get(self.service, lambda x: None)(data)
         return result
 
