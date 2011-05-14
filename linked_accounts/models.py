@@ -12,27 +12,17 @@ class LinkedAccount(models.Model):
     def api_response_data(self):
         return json.loads(self.api_response)
 
+    def get_handler(self):
+        from linked_accounts.handlers import AuthHandler
+        return AuthHandler.get_handler(self.service)
+
     @property
     def username(self):
-        data = self.api_response_data
-        result = {
-            "twitter": lambda x: x["screen_name"],
-            "facebook": lambda x: x["first_name"] + "_" + x["last_name"],
-            "yahoo": lambda x: x['nickname'],
-            "google": lambda x: x["feed", "id", "$t"],
-        }.get(self.service, lambda x: None)(data)
-
-        return result
+        return self.get_handler().get_username(self)
 
     @property
     def email(self):
-        data = self.api_response_data
-        result = {
-            "facebook": lambda x: x.get("email", None),
-            "yahoo": lambda x: x.get('email', None),
-            "google": lambda x: x.get("email", None),
-        }.get(self.service, lambda x: None)(data)
-        return result
+        return self.get_handler().get_email(self)
 
     class Meta:
         unique_together = ('identifier', 'service')

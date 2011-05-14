@@ -64,7 +64,7 @@ def login(request, template_name="linked_accounts/login.html"):
 
 def register(request, template_name="linked_accounts/registration.html"):
     next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
-    
+
     try:
         profile_id = request.session[LINKED_ACCOUNTS_ID_SESSION]
         profile = LinkedAccount.objects.get(id=profile_id)

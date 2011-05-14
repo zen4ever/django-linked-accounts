@@ -7,8 +7,6 @@ from django.utils.importlib import import_module
 
 from oauth_access.access import OAuthAccess, OAuth20Token
 
-from linked_accounts.models import LinkedAccount
-
 
 LINKED_ACCOUNTS_HANDLERS = (
     ('facebook', 'linked_accounts.handlers.FacebookHandler'),
@@ -42,14 +40,22 @@ class AuthHandler(object):
                 identifier = identifier[name]
         else:
             identifier = profile[self.identifier_name]
+
+        from linked_accounts.models import LinkedAccount
         account, created = LinkedAccount.objects.get_or_create(
-            identifier = identifier,
-            service = self.service
+            identifier=identifier,
+            service=self.service
         )
         if created:
             account.api_response = api_response
             account.save()
         return account
+
+    def get_email(self, profile):
+        return profile.api_response_data.get("email", None)
+
+    def get_username(self, profile):
+        raise NotImplemented()
 
     @classmethod
     def get_handler(cls, service):
@@ -67,11 +73,18 @@ class TwitterHandler(AuthHandler):
     profile_url = "https://twitter.com/account/verify_credentials.json"
     identifier_name = "screen_name"
 
+    def get_username(self, profile):
+        return profile.api_response_data["screen_name"]
+
 
 class FacebookHandler(AuthHandler):
     service = "facebook"
     profile_url = "https://graph.facebook.com/me"
     identifier_name = "id"
+
+    def get_username(self, profile):
+        data = profile.api_response_data
+        return data["first_name"] + "_" + data["last_name"]
 
     def get_profile(self, token, **kwargs):
         token = OAuth20Token(
@@ -86,11 +99,19 @@ class GoogleHandler(AuthHandler):
     profile_url = "https://www.google.com/m8/feeds/contacts/default/full?max-results=0&alt=json"
     identifier_name = ["feed", "id", "$t"]
 
+    def get_username(self, profile):
+        data = profile.api_response_data
+        return data["feed"]["id"]["$t"]
+
 
 class YahooHandler(AuthHandler):
     service = "yahoo"
     profile_url = "http://social.yahooapis.com/v1/me/guid&format=json"
     identifier_name = ["guid", "value"]
+
+    def get_username(self, profile):
+        data = profile.api_response_data
+        return data["nickname"]
 
     def get_profile(self, token, **kwargs):
         account = super(YahooHandler, self).get_profile(token, **kwargs)
