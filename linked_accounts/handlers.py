@@ -16,6 +16,12 @@ LINKED_ACCOUNTS_HANDLERS = (
     ('linkedin', 'linked_accounts.handlers.LinkedInHandler'),
 )
 
+LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE = getattr(
+    settings,
+    'LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE',
+    False
+)
+
 HANDLERS = getattr(
     settings,
     'LINKED_ACCOUNTS_HANDLERS',
@@ -47,7 +53,7 @@ class AuthHandler(object):
             identifier=identifier,
             service=self.service
         )
-        if created:
+        if created or settings.LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE:
             account.api_response = api_response
             account.save()
         return account
