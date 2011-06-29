@@ -28,6 +28,12 @@ LINKED_ACCOUNTS_ALLOW_REGISTRATION = getattr(
     True
 )
 
+LINKED_ACCOUNTS_ALLOW_LOGIN = getattr(
+    settings,
+    'LINKED_ACCOUNTS_ALLOW_LOGIN',
+    True
+)
+
 
 class AuthCallback(object):
     def __call__(self, request, access, token):
@@ -43,7 +49,7 @@ class AuthCallback(object):
                            identifier="auth")
         else:
             profile = auth.authenticate(service=service, token=token)
-            if profile.user:
+            if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
                 profile.user.backend = "linked_accounts.backends.LinkedAccountsBackend"
                 auth.login(request, profile.user)
                 access.persist(profile.user,
