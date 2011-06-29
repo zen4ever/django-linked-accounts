@@ -53,7 +53,7 @@ class AuthHandler(object):
             identifier=identifier,
             service=self.service
         )
-        if created or settings.LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE:
+        if created or LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE:
             account.api_response = api_response
             account.save()
         return account

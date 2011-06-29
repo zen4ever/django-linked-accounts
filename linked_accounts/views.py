@@ -69,6 +69,15 @@ def oauth_access_success(request, access, token):
 def login(request, template_name="linked_accounts/login.html"):
     next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
     request.session[LINKED_ACCOUNTS_NEXT_KEY] = next_url
+    service = request.REQUEST.get('service', '')
+    if service and service in settings.OAUTH_ACCESS_SETTINGS:
+        return HttpResponseRedirect(
+            reverse('oauth_access_login', args=[service])
+        )
+    if len(settings.OAUTH_ACCESS_SETTINGS) == 1:
+        return HttpResponseRedirect(
+            reverse('oauth_access_login', args=[settings.OAUTH_ACCESS_SETTINGS.keys()[0]])
+        )
     return direct_to_template(request, template_name)
 
 
