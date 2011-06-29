@@ -8,6 +8,9 @@ class LinkedAccount(models.Model):
     user = models.ForeignKey('auth.User', null=True)
     api_response = models.TextField(default='', blank=True)
 
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
     @property
     def api_response_data(self):
         return json.loads(self.api_response)
