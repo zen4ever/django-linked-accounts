@@ -22,6 +22,12 @@ LINKED_ACCOUNTS_NEXT_KEY = getattr(
     'oauth_next'
 )
 
+LINKED_ACCOUNTS_ALLOW_REGISTRATION = getattr(
+    settings,
+    'LINKED_ACCOUNTS_ALLOW_REGISTRATION',
+    True
+)
+
 
 class AuthCallback(object):
     def __call__(self, request, access, token):
@@ -43,10 +49,14 @@ class AuthCallback(object):
                 access.persist(profile.user,
                                token,
                                identifier="auth")
-            else:
+            elif LINKED_ACCOUNTS_ALLOW_REGISTRATION:
                 request.session[LINKED_ACCOUNTS_ID_SESSION] = profile.id
                 return HttpResponseRedirect(
                     reverse('linked_accounts_register') + "?next=%s" % next_url
+                )
+            else:
+                return HttpResponseRedirect(
+                    reverse('linked_accounts_registration_closed')
                 )
         return HttpResponseRedirect(next_url)
 
@@ -62,7 +72,15 @@ def login(request, template_name="linked_accounts/login.html"):
     return direct_to_template(request, template_name)
 
 
+def registration_closed(request, template_name="linked_accounts/registration_closed.html"):
+    return direct_to_template(request, template_name)
+
+
 def register(request, form_class=RegisterForm, template_name="linked_accounts/registration.html"):
+    if not LINKED_ACCOUNTS_ALLOW_REGISTRATION:
+        return HttpResponseRedirect(
+            reverse('linked_accounts_registration_closed')
+        )
     next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
 
     try:
