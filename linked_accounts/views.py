@@ -55,12 +55,14 @@ def oauth_access_success(request, access, token):
     callback = AuthCallback()
     return callback(request, access, token)
 
+
 def login(request, template_name="linked_accounts/login.html"):
     next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
     request.session[LINKED_ACCOUNTS_NEXT_KEY] = next_url
     return direct_to_template(request, template_name)
 
-def register(request, template_name="linked_accounts/registration.html"):
+
+def register(request, form_class=RegisterForm, template_name="linked_accounts/registration.html"):
     next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
 
     try:
@@ -78,7 +80,7 @@ def register(request, template_name="linked_accounts/registration.html"):
         initial_data['email'] = email
 
     if request.method == "POST":
-        form = RegisterForm(request.POST)
+        form = form_class(request.POST)
 
         if form.is_valid():
             user = form.save(profile)
@@ -86,7 +88,7 @@ def register(request, template_name="linked_accounts/registration.html"):
             auth.login(request, user)
             return HttpResponseRedirect(next_url)
     else:
-        form = RegisterForm(initial=initial_data)
+        form = form_class(initial=initial_data)
 
     return direct_to_template(
         request,

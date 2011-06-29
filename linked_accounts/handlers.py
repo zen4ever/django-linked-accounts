@@ -140,4 +140,4 @@ class LinkedInHandler(AuthHandler):
 
     def get_username(self, profile):
         data = profile.api_response_data
-        return data["firstName"]+"_"+data["lastName"]
+        return data["firstName"] + "_" + data["lastName"]
