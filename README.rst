@@ -8,3 +8,4 @@ third-party service accounts, including:
  * Facebook
  * Yahoo
  * Google
+ * LinkedIn
