@@ -13,6 +13,7 @@ LINKED_ACCOUNTS_HANDLERS = (
     ('twitter', 'linked_accounts.handlers.TwitterHandler'),
     ('google', 'linked_accounts.handlers.GoogleHandler'),
     ('yahoo', 'linked_accounts.handlers.YahooHandler'),
+    ('linkedin', 'linked_accounts.handlers.LinkedInHandler'),
 )
 
 HANDLERS = getattr(
@@ -124,3 +125,13 @@ class YahooHandler(AuthHandler):
         account.api_response = api_response
         account.save()
         return account
+
+
+class LinkedInHandler(AuthHandler):
+    service = "linkedin"
+    profile_url = "http://api.linkedin.com/v1/people/~:(id,first-name,last-name,three-current-positions,picture-url,public-profile-url)?format=json"
+    identifier_name = "id"
+
+    def get_username(self, profile):
+        data = profile.api_response_data
+        return data["firstName"]+"_"+data["lastName"]
