@@ -13,6 +13,7 @@ Contents:
 
    overview
    installation
+   gettingstarted
 
 Indices and tables
 ==================

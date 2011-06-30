@@ -19,6 +19,7 @@ dependencies:
 Or use supplied "requirements.txt" file:
 
 ::
+
     git clone git://github.com/zen4ever/django-linked-accounts.git
     cd django-linked-accounts/
     pip install -r requirements.txt
@@ -32,8 +33,8 @@ Then you can install linked accounts themselves:
 
     pip install -e git://github.com/zen4ever/django-linked-accounts.git
 
-Usage
-=====
+Project integration
+===================
 
 Add oauth_access and linked_accounts to your ``INSTALLED_APPS``:
 
