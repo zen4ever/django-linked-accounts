@@ -41,7 +41,7 @@ class AuthCallback(object):
         self.request = request
         self.token = token
         if request.user.is_authenticated():
-            self.connect_profile(self, request.user, access, token)
+            self.connect_profile_to_user(self, request.user, access, token)
         else:
             profile = auth.authenticate(service=access.service, token=token)
             if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
