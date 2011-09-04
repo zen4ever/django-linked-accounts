@@ -41,7 +41,7 @@ class AuthCallback(object):
         self.request = request
         self.token = token
         if request.user.is_authenticated():
-            self.connect_profile_to_user(self, request.user, access, token)
+            self.link_profile_to_user(self, request.user, access, token)
         else:
             profile = auth.authenticate(service=access.service, token=token)
             if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
@@ -73,7 +73,7 @@ class AuthCallback(object):
             reverse('linked_accounts_registration_closed')
         )
 
-    def connect_profile_to_user(self):
+    def link_profile_to_user(self):
         profile = AuthHandler.get_handler(self.access.service).get_profile(self.token)
         if not profile.user:
             profile.user = self.request.user
