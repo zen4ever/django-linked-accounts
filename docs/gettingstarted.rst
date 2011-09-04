@@ -2,12 +2,96 @@
 Getting Started
 ===============
 
+Welcome to the documentation for Django Linked Accounts. Here you'll
+find everything you need to get started using this reusable app in
+your Django projects. Good luck and thanks for reading!
+
+Settings
+========
+
+.. _linked_accounts_allow_registration:
+
+``LINKED_ACCOUNTS_ALLOW_REGISTRATION``
+--------------------------------------
+
+Default: ``True``
+
+Set this to ``False`` to prohibit auth.User creation after OAuth login.
+This is useful if you want to only allow your users to link third-party
+accounts to their existing auth.User account, but not allow sign up via
+third-party service.
+
+.. _linked_accounts_allow_login:
+
+``LINKED_ACCOUNTS_ALLOW_LOGIN``
+-------------------------------
+
+Default: ``True``
+
+Set this to ``False`` to prohibit users from logging in via OAuth.
+This is useful if you want to only retrieve data from a third-party
+service that requires OAuth authentication.
+
+.. _linked_accounts_next_key:
+
+``LINKED_ACCOUNTS_NEXT_KEY``
+----------------------------
+
+Default: ``oauth_next``
+
+This setting is used in a session variable that stores the desired URL
+to be redirected to following successful OAuth login. Make sure to
+create the corresponding view if you set a custom value here.
+
+.. _linked_accounts_id_session:
+
+``LINKED_ACCOUNTS_ID_SESSION``
+------------------------------
+
+Default: ``_linked_account_id``
+
+Modify this setting to change the session key that stores the
+``LinkedAccount`` id temporarily during sign up via third-party
+service.
+
+.. _linked_accounts_handlers:
+
+``LINKED_ACCOUNTS_HANDLERS``
+----------------------------
+
+Default:
+  .. code-block:: python
+
+      LINKED_ACCOUNTS_HANDLERS = (
+          ('facebook', 'linked_accounts.handlers.FacebookHandler'),
+          ('twitter', 'linked_accounts.handlers.TwitterHandler'),
+          ('google', 'linked_accounts.handlers.GoogleHandler'),
+          ('yahoo', 'linked_accounts.handlers.YahooHandler'),
+          ('linkedin', 'linked_accounts.handlers.LinkedInHandler'),
+      )
+
+This setting contains a set of classes responsible for retrieving user
+profile information for third-party services. It is inherited from
+``AuthHandler``, but can be overridden by supplying your own classes.
+
+.. _linked_accounts_always_update_profile:
+
+``LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE``
+------------------------------
+
+Default: ``False``
+
+Set this to ``True`` if you want the data stored in
+``LinkedAccount.api_response`` each time a user successfully logs in
+via OAuth. Keep the default value to only update this data once
+during the first OAuth login for each service.
+
 Login
 =====
 
-Django Linked Accounts contains login view. It displays template
-"linked_accounts/login.html" which should contain a list of links
-to start login with individual services, for example:
+Django Linked Accounts contains a sample login view. It displays the
+template "linked_accounts/login.html", which should contain a list of
+links/buttons login with the individual services you , for example:
 
 .. code-block:: html
 
@@ -55,49 +139,9 @@ It will prevent creation of new users authenticated with third-party services
 with already associated third-party service profiles still will be able to
 login.
 
-Email confirmation
-==================
-
-By default Django Linked Accounts provides very simple ``RegistrationForm``
-which only asks users for their email, but doesn't actually do any email
-confirmation steps. Depending on your flow you might want to supply your own
-registration form. For example, you could use django-emailconfirmation to send a
-confirmation email to user.
-
-Settings
-========
-
- * ``LINKED_ACCOUNTS_ALLOW_REGISTRATION`` - set to False if you don't want to
-   allow new user creation after OAuth login
-
- * ``LINKED_ACCOUNTS_ALLOW_LOGIN`` - set to False if you don't want to allow users
-   to login with OAuth. (Useful, if you just want to use Linked Accounts to
-   retrieve user's profile for certain service, and store it, but still want
-   your users to login just using username/password.
-
- * ``LINKED_ACCOUNTS_NEXT_KEY`` - session key for storing next url during user
-   login, defaults to "oauth_next"
-
- * ``LINKED_ACCOUNTS_ID_SESSION`` - session key for storing ``LinkedAccount`` id after
-   initial profile creation, but before registration, defaults to
-   '_linked_account_id'
-
- * ``LINKED_ACCOUNTS_HANDLERS`` - set of classes responsible for retrieving user
-   profile information for third-party services, inherited from ``AuthHandler``,
-   you can override them by supplying your own class. Default value:
-
-   .. code-block:: python
-
-      LINKED_ACCOUNTS_HANDLERS = (
-          ('facebook', 'linked_accounts.handlers.FacebookHandler'),
-          ('twitter', 'linked_accounts.handlers.TwitterHandler'),
-          ('google', 'linked_accounts.handlers.GoogleHandler'),
-          ('yahoo', 'linked_accounts.handlers.YahooHandler'),
-          ('linkedin', 'linked_accounts.handlers.LinkedInHandler'),
-      )
-
- * ``LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE`` - set to True if you want to update
-   third-party service's profile information stored in
-   ``LinkedAccount.api_response`` each time user performes OAuth login into
-   the service. By default it will fetch profile data only during account
-   creation, and store it as a JSON.
+Django Linked Accounts provides a simple ``RegistrationForm`` which is
+used to collect each user's email address during registration. However,
+please note that the app does not handle email confirmation or any other
+transactional email notifications. If this app does not match the desired
+flow for your project, you can override the registration form, view, or
+even individual methods found in ``AuthCallback``.

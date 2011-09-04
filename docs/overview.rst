@@ -4,9 +4,10 @@
 Overview
 ========
 
-Django Linked Accounts provides pure OAuth-based authentication with third-party service accounts.
+Django Linked Accounts handles linking Django auth.User
+accounts with OAuth-compatible third-party service accounts.
 
-Supported services
+Supported Services
 ==================
 
  * Twitter
@@ -18,7 +19,7 @@ Supported services
 Flow
 ====
 
-It implements following flow:
+This app implements following flow:
 
 .. image:: _static/linked_accounts_flow.png
    :width: 800 px
