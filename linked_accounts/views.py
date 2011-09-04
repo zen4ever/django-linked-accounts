@@ -37,34 +37,50 @@ LINKED_ACCOUNTS_ALLOW_LOGIN = getattr(
 
 class AuthCallback(object):
     def __call__(self, request, access, token):
-        next_url = request.session.get(LINKED_ACCOUNTS_NEXT_KEY, settings.LOGIN_REDIRECT_URL)
-        service = access.service
+        self.access = access
+        self.request = request
+        self.token = token
         if request.user.is_authenticated():
-            profile = AuthHandler.get_handler(service).get_profile(token)
-            if not profile.user:
-                profile.user = request.user
-                profile.save()
-            access.persist(request.user,
-                           token,
-                           identifier="auth")
+            self.connect_profile(self, request.user, access, token)
         else:
-            profile = auth.authenticate(service=service, token=token)
+            profile = auth.authenticate(service=access.service, token=token)
             if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
-                profile.user.backend = "linked_accounts.backends.LinkedAccountsBackend"
-                auth.login(request, profile.user)
-                access.persist(profile.user,
-                               token,
-                               identifier="auth")
+                self.login(profile)
             elif LINKED_ACCOUNTS_ALLOW_REGISTRATION:
-                request.session[LINKED_ACCOUNTS_ID_SESSION] = profile.id
-                return HttpResponseRedirect(
-                    reverse('linked_accounts_register') + "?next=%s" % next_url
-                )
+                return self.create_user(self, request, profile)
             else:
-                return HttpResponseRedirect(
-                    reverse('linked_accounts_registration_closed')
-                )
-        return HttpResponseRedirect(next_url)
+                return self.registration_closed()
+        return HttpResponseRedirect(self.get_next_url())
+
+    def get_next_url(self):
+        return self.request.session.get(LINKED_ACCOUNTS_NEXT_KEY, settings.LOGIN_REDIRECT_URL)
+
+    def create_user(self, profile):
+        self.request.session[LINKED_ACCOUNTS_ID_SESSION] = profile.id
+        return HttpResponseRedirect(
+            reverse('linked_accounts_register') + "?next=%s" % self.get_next_url()
+        )
+
+    def login(self, profile):
+        profile.user.backend = "linked_accounts.backends.LinkedAccountsBackend"
+        auth.login(self.request, profile.user)
+        self.access.persist(profile.user,
+                            self.token,
+                            identifier="auth")
+
+    def registration_closed(self):
+        return HttpResponseRedirect(
+            reverse('linked_accounts_registration_closed')
+        )
+
+    def connect_profile_to_user(self):
+        profile = AuthHandler.get_handler(self.access.service).get_profile(self.token)
+        if not profile.user:
+            profile.user = self.request.user
+            profile.save()
+        self.access.persist(self.request.user,
+                            self.token,
+                            identifier="auth")
 
 
 def oauth_access_success(request, access, token):
