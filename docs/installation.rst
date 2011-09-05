@@ -2,13 +2,29 @@
 Installation
 ============
 
-Dependencies
-============
+Installing and integrating Django Linked Accounts requires the
+following steps:
 
-Django Linked Accounts depends on Eldarion's django-oauth-access,
-if you need support for Google Accounts, you will need to install my fork of
-it. You can run following commands through "pip install" to install necessary
-dependencies:
+#. `Install Dependencies`_
+#. `Install Django App`_
+#. `Include URLs`_
+#. `Add Authentication Backend`_
+#. `Obtain Service Keys`_
+#. `Add Settings`_
+
+.. _install-dependencies:
+
+Install Dependencies
+--------------------
+
+Django Linked Accounts depends on Eldarion's `django-oauth-access
+<https://github.com/eldarion/django-oauth-access>`_.
+If you need support for Google Accounts, you will need to install
+`Zen4Ever's fork of django-oauth-access
+<https://github.com/zen4ever/django-oauth-access>`_.
+
+You can run the following commands through ``pip install`` to install
+the necessary dependencies:
 
 ::
 
@@ -16,7 +32,7 @@ dependencies:
     httplib2>=0.6.0
     oauth2>=1.5.167
 
-Or use supplied "requirements.txt" file:
+Or use supplied ``requirements.txt`` file:
 
 ::
 
@@ -24,29 +40,35 @@ Or use supplied "requirements.txt" file:
     cd django-linked-accounts/
     pip install -r requirements.txt
 
-App installation
-================
-
-Then you can install linked accounts themselves:
+You can install the python package with the following:
 
 ::
 
     pip install -e git://github.com/zen4ever/django-linked-accounts.git
 
-Project integration
-===================
+.. _install-django-app:
 
-Add oauth_access and linked_accounts to your ``INSTALLED_APPS``:
+Install Django App
+------------------
+
+Add ``oauth_access`` and ``linked_accounts`` to your ``INSTALLED_APPS``
+(``settings.py``):
 
 .. code-block:: python
 
-    INSTALLED_APPS = [
+    INSTALLED_APPS = (
         # ...
         "oauth_access",
         "linked_accounts",
-    ]
+    )
 
-Hook them up to your URLconf:
+.. _install-urls:
+
+Include URLs
+------------
+
+Include the URLs for ``oauth_access`` and ``linked_accounts``
+following in your URLconf (``urls.py``):
 
 .. code-block:: python
 
@@ -56,8 +78,14 @@ Hook them up to your URLconf:
         url(r"^linked_accounts/", include("linked_accounts.urls"))
     )
 
-You would probably want to add linked_accounts auth backend to you
-``AUTHENTICATION_BACKENDS``:
+.. _add-authentication-backend:
+
+Add Authentication Backend
+--------------------------
+
+Add the custom authentication backend to your
+``AUTHENTICATION_BACKENDS`` (``settings.py``) to allow OAuth authentication
+with Django Linked Accounts.
 
 .. code-block:: python
 
@@ -66,9 +94,44 @@ You would probably want to add linked_accounts auth backend to you
         'linked_accounts.backends.LinkedAccountsBackend',
     )
 
-Then you need to add OAuth settings for each service you want to use. Here is
-a basic skeleton for supported services. To obtain ``KEY`` and ``SECRET`` you
-will have to register an application with each service:
+.. _obtain-service-keys:
+
+Obtain Service Keys
+-------------------
+
+You will need to obtain a ``KEY`` and ``SECRET`` with each third-party
+service you want to support. Yes, it's tedious. But, hey, you only have
+to do it once for your app and you can piggyback on established social
+graphs and make things easier for your users by importing information
+already entered elsewhere.
+
+Here are some handy reference links to get you started:
+
+- Facebook: `https://developers.facebook.com/apps <hhttps://developers.facebook.com/apps>`_ (click the "Create New App" button...)
+- Twitter: `https://dev.twitter.com/apps/new <https://dev.twitter.com/apps/new>`_
+- Google: `http://code.google.com/apis/base/signup.html <http://code.google.com/apis/base/signup.html>`_
+- Yahoo: `https://developer.apps.yahoo.com/wsregapp <https://developer.apps.yahoo.com/wsregapp/>`_
+- LinkedIn: `https://www.linkedin.com/secure/developer <https://www.linkedin.com/secure/developer>`_
+
+Most of these services require you to register an authentication
+callback URL to redirect to after a user authorizes your app.
+Here's an example callback URL for Twitter:
+
+.. code-block:: html
+
+  http://yourdomain.com/oauth/callback/twitter/
+
+.. _add-settings:
+
+Add Settings
+------------
+
+Lastly, add OAuth settings in your ``settings.py`` for each service
+you want to integrate with using the ``KEY`` and ``SECRET`` values
+you obtained in the previous installation step.
+
+Use the following code as a reference and include only the services
+you want to support:
 
 .. code-block:: python
 
