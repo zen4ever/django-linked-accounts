@@ -9,6 +9,9 @@ your Django projects. Good luck and thanks for reading!
 Settings
 ========
 
+The following are optional settings variables that can be included in
+your project's ``settings.py`` to override certain defaults.
+
 .. _linked_accounts_allow_registration:
 
 ``LINKED_ACCOUNTS_ALLOW_REGISTRATION``
@@ -39,9 +42,9 @@ service that requires OAuth authentication.
 
 Default: ``oauth_next``
 
-This setting is used in a session variable that stores the desired URL
-to be redirected to following successful OAuth login. Make sure to
-create the corresponding view if you set a custom value here.
+This setting can be used to override the default session variable
+key used in the ``get_next_url`` method of ``AuthCallback``. If
+set to ``None``, ``settings.LOGIN_REDIRECT_URL`` will be used.
 
 .. _linked_accounts_id_session:
 
@@ -89,30 +92,36 @@ during the first OAuth login for each service.
 Login
 =====
 
-Django Linked Accounts contains a sample login view. It displays the
-template "linked_accounts/login.html", which should contain a list of
-links/buttons login with the individual services you , for example:
+Django Linked Accounts contains a sample login view.
+
+It displays the template "linked_accounts/login.html", which contains
+login links for each supported service. For example:
 
 .. code-block:: html
 
   <a href="{% url oauth_access_login "facebook" %}">Sign in with Facebook</a>
   <a href="{% url oauth_access_login "twitter" %}">Sign in with Twitter</a>
 
-It also saves next url passed as a GET parameter "next" in a session variable,
-so user will be redirected to it upon successful authentication. If you are
-going to use Django Linked Accounts as your main authentication mechanism,
-you can just specify in your settings.py:
+The login view also saves the GET parameter ``next`` in a session variable
+that is used to redirect the user after successful OAuth authentication.
+
+If you are going to use Django Linked Accounts as your main authentication
+mechanism, set the following in your ``settings.py``:
 
 .. code-block:: python
 
    LOGIN_URL = "/linked_accounts/login/"
 
-Alternatively you can pass additional "service" parameter to the login view,
-then it will skip template rendering and redirect you to the oauth login view,
-preserving "next" url in the variable. If you are planning to use Django Linked
-Accounts as a supplemental app to ``django.contrib.auth``, you can place a set
-of links in your "accounts/login.html" somewhere above or below your main login
-form, like this:
+Alternatively, you can pass the additional GET parameter ``service`` to
+the login view to bypass Django Linked Accounts' login template rendering
+and redirect you to the django-oauth-access login view, preserving ``next``
+GET parameter in the redirect URL.
+
+If you are planning to use Django Linked Accounts as a supplemental app to
+``django.contrib.auth``, for example, to link existing third-party accounts
+to ``auth.User`` accounts, you can include links in your
+``linked_accounts/login.html`` in addition to your ``auth.User`` login form
+like this:
 
 .. code-block:: html
 
@@ -122,26 +131,29 @@ form, like this:
 Registration
 ============
 
-Registration happens when OAuth authorization with a service is completed, new
-``LinkedAccount`` profile gets created, and current user is not authenticated
-yet. So, user will be redirected to "/linked_accounts/register/", where they can
-choose a username and specify their email (if service provides user's email
+Django Linked Accounts contains a simple registration view.
+
+When a logged-out user successfully completes OAuth authentication with a
+third-party service, a new ``LinkedAccount`` profile is created and the
+user is redirected to ``/linked_accounts/register/`` where they can choose
+a username and enter their email address. If an email address was collected
 during OAuth authentication, it will be listed as an initial value in the
-registration form).
+registration form.
 
-Once form is submitted, new ``User`` is created and will be automatically
-logged in.
+Once the registration form is submitted, a new ``auth.User`` is created and
+is logged in.
 
-You can disallow registration process by setting
-``LINKED_ACCOUNTS_ALLOW_REGISTRATION`` to False in your settings.py.
-It will prevent creation of new users authenticated with third-party services
-(might be useful for private betas, or closed websites). Currently active users
-with already associated third-party service profiles still will be able to
-login.
+You can prohibit registration via third-party services by setting
+``LINKED_ACCOUNTS_ALLOW_REGISTRATION`` to ``False`` in your ``settings.py``.
+This will prevent the creation of new users authenticated with third-party
+services, which might be useful for private betas or similar. Please note that
+if a valid ``auth.User`` is already linked to a third-party service in Django
+Linked Accounts, login via that service will be allowed.
 
 Django Linked Accounts provides a simple ``RegistrationForm`` which is
 used to collect each user's email address during registration. However,
-please note that the app does not handle email confirmation or any other
+please note that this app does not handle email confirmation or any other
 transactional email notifications. If this app does not match the desired
-flow for your project, you can override the registration form, view, or
-even individual methods found in ``AuthCallback``.
+flow for your project, you can inherit and override the registration form,
+view, or even individual methods found in ``AuthCallback`` in your own custom
+views.

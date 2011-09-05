@@ -10,10 +10,10 @@ accounts with OAuth-compatible third-party service accounts.
 Supported Services
 ==================
 
- * Twitter
  * Facebook
- * Yahoo
+ * Twitter
  * Google
+ * Yahoo
  * LinkedIn
 
 Flow
