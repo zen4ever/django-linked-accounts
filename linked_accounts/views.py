@@ -47,7 +47,7 @@ class AuthCallback(object):
             if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
                 self.login(profile)
             elif LINKED_ACCOUNTS_ALLOW_REGISTRATION:
-                return self.create_user(self, request, profile)
+                return self.create_user(self, profile)
             else:
                 return self.registration_closed()
         return HttpResponseRedirect(self.get_next_url())
