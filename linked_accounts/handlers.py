@@ -94,9 +94,13 @@ class FacebookHandler(AuthHandler):
         return data["first_name"] + "_" + data["last_name"]
 
     def get_profile(self, token, **kwargs):
+        if token.expires:
+            expires = (token.expires - datetime.now()).seconds
+        else:
+            expires = None
         token = OAuth20Token(
             token=token,
-            expires=(token.expires - datetime.now()).seconds
+            expires=expires
         )
         return super(FacebookHandler, self).get_profile(token, **kwargs)
 
