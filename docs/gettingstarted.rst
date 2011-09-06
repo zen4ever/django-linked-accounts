@@ -43,9 +43,9 @@ service that requires OAuth authentication.
 Default: ``oauth_next``
 
 This setting can be used to override the default session variable
-key used to store ``next_url`` between redirects to and from OAuth service.
-You probably won't need to change this setting, unless you use ``oauth_next``
-key in your sessions for something else.
+key used to store ``next_url`` between redirects to and from OAuth services.
+You probably won't need to change this setting unless you use the
+``oauth_next`` session key for something else in your project.
 
 .. _linked_accounts_id_session:
 
@@ -81,7 +81,7 @@ profile information for third-party services. It is inherited from
 .. _linked_accounts_always_update_profile:
 
 ``LINKED_ACCOUNTS_ALWAYS_UPDATE_PROFILE``
-------------------------------
+-----------------------------------------
 
 Default: ``False``
 
