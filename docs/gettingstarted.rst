@@ -43,8 +43,9 @@ service that requires OAuth authentication.
 Default: ``oauth_next``
 
 This setting can be used to override the default session variable
-key used in the ``get_next_url`` method of ``AuthCallback``. If
-set to ``None``, ``settings.LOGIN_REDIRECT_URL`` will be used.
+key used to store ``next_url`` between redirects to and from OAuth service.
+You probably won't need to change this setting, unless you use ``oauth_next``
+key in your sessions for something else.
 
 .. _linked_accounts_id_session:
 
