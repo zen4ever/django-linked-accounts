@@ -91,7 +91,7 @@ class FacebookHandler(AuthHandler):
 
     def get_username(self, profile):
         data = profile.api_response_data
-        return data["first_name"] + "_" + data["last_name"]
+        return (data["first_name"] + "_" + data["last_name"]).lower()
 
     def get_profile(self, token, **kwargs):
         if token.expires:

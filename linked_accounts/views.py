@@ -44,9 +44,8 @@ class AuthCallback(object):
             self.link_profile_to_user()
         else:
             profile = auth.authenticate(service=access.service, token=token)
-            if profile:
-                if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
-                    self.login(profile)
+            if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
+                self.login(profile)
             elif LINKED_ACCOUNTS_ALLOW_REGISTRATION:
                 return self.create_user(profile)
             else:
