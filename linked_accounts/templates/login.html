@@ -1,3 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
 <h1>Login</h1>
 <ul>
 <li><a href="{% url oauth_access_login "facebook" %}">Sign in with Facebook</a></li>
@@ -6,3 +8,4 @@
 <li><a href="{% url oauth_access_login "google" %}">Sign in with Google</a></li>
 <li><a href="{% url oauth_access_login "linkedin" %}">Sign in with Linked In</a></li>
 </ul>
+{% endblock %}
