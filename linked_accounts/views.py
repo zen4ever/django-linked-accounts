@@ -41,13 +41,13 @@ class AuthCallback(object):
         self.request = request
         self.token = token
         if request.user.is_authenticated():
-            self.link_profile_to_user(self, request.user, access, token)
+            self.link_profile_to_user()
         else:
             profile = auth.authenticate(service=access.service, token=token)
             if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
                 self.login(profile)
             elif LINKED_ACCOUNTS_ALLOW_REGISTRATION:
-                return self.create_user(self, profile)
+                return self.create_user(profile)
             else:
                 return self.registration_closed()
         return HttpResponseRedirect(self.get_next_url())
