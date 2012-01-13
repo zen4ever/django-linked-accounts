@@ -1,11 +1,7 @@
-from datetime import datetime
-
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import simplejson as json
 from django.utils.importlib import import_module
-
-from oauth_access.access import OAuthAccess, OAuth20Token
 
 
 LINKED_ACCOUNTS_HANDLERS = (
@@ -34,11 +30,13 @@ class AuthHandler(object):
     profile_url = None
     identifier_name = None
 
-    def get_access(self):
-        return OAuthAccess(self.service)
+    def get_access(self, **kwargs):
+        from oauth_flow.handlers import get_handler
+        oauth_handler = get_handler(self.service, **kwargs)
+        return oauth_handler
 
     def get_profile(self, token, **kwargs):
-        access = self.get_access()
+        access = self.get_access(**kwargs)
         api_response = access.make_api_call("raw", self.profile_url, token)
         profile = json.loads(api_response)
         if isinstance(self.identifier_name, list):
@@ -93,31 +91,20 @@ class FacebookHandler(AuthHandler):
         data = profile.api_response_data
         return (data["first_name"] + "_" + data["last_name"]).lower()
 
-    def get_profile(self, token, **kwargs):
-        if token.expires:
-            expires = (token.expires - datetime.now()).seconds
-        else:
-            expires = None
-        token = OAuth20Token(
-            token=token,
-            expires=expires
-        )
-        return super(FacebookHandler, self).get_profile(token, **kwargs)
-
 
 class GoogleHandler(AuthHandler):
     service = "google"
-    profile_url = "https://www.google.com/m8/feeds/contacts/default/full?max-results=0&alt=json"
-    identifier_name = ["feed", "id", "$t"]
+    profile_url = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json"
+    identifier_name = "id"
 
     def get_username(self, profile):
         data = profile.api_response_data
-        return data["feed"]["id"]["$t"]
+        return data["email"].split("@")[0]
 
 
 class YahooHandler(AuthHandler):
     service = "yahoo"
-    profile_url = "http://social.yahooapis.com/v1/me/guid&format=json"
+    profile_url = "http://social.yahooapis.com/v1/me/guid?format=json"
     identifier_name = ["guid", "value"]
 
     def get_username(self, profile):
@@ -129,7 +116,7 @@ class YahooHandler(AuthHandler):
         access = self.get_access()
         api_response = access.make_api_call(
             "raw",
-            "http://social.yahooapis.com/v1/user/%s/profile&format=json" % account.identifier,
+            "http://social.yahooapis.com/v1/user/%s/profile?format=json" % account.identifier,
             token
         )
         account.api_response = api_response
