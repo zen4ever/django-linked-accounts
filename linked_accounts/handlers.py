@@ -107,9 +107,29 @@ class YahooHandler(AuthHandler):
     profile_url = "http://social.yahooapis.com/v1/me/guid?format=json"
     identifier_name = ["guid", "value"]
 
-    def get_username(self, profile):
+    def get_emails(self, profile):
         data = profile.api_response_data
-        return data["nickname"]
+        emails = {}
+        for x in data['profile']['emails']:
+            if x.get('primary', False):
+                emails['primary'] = x['handle']
+            if x['handle'].endswith('@yahoo.com'):
+                emails['yahoo'] = x['handle']
+        return emails
+
+    def get_email(self, profile):
+        emails = self.get_emails(profile)
+        return emails.get('primary', None)
+
+    def get_username(self, profile):
+        emails = self.get_emails(profile)
+        if emails:
+            if 'yahoo' in emails:
+                return emails['yahoo'].split('@')[0]
+            elif 'primary' in emails:
+                return emails['primary'].split('@')[0]
+        data = profile.api_response_data
+        return data['profile']["nickname"]
 
     def get_profile(self, token, **kwargs):
         account = super(YahooHandler, self).get_profile(token, **kwargs)
