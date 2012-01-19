@@ -36,6 +36,12 @@ LINKED_ACCOUNTS_AUTO_REGISTRATION = getattr(
     True
 )
 
+LINKED_ACCOUNTS_EMAIL_ASSOCIATION = getattr(
+    settings,
+    'LINKED_ACCOUNTS_EMAIL_ASSOCIATION',
+    False
+)
+
 LINKED_ACCOUNTS_ALLOW_LOGIN = getattr(
     settings,
     'LINKED_ACCOUNTS_ALLOW_LOGIN',
@@ -46,7 +52,7 @@ LINKED_ACCOUNTS_ALLOW_LOGIN = getattr(
 def permute_name(name_string, num):
     num_str=str(num)
     max_len=29-len(num_str)
-    return ''.join([name_string[0:max_len], '-', num_str])
+    return ''.join([name_string[0:max_len], '_', num_str])
 
 
 class AuthCallback(object):
@@ -58,8 +64,9 @@ class AuthCallback(object):
             self.link_profile_to_user()
         else:
             profile = auth.authenticate(service=access.SERVICE, token=token)
-            if profile.user and LINKED_ACCOUNTS_ALLOW_LOGIN:
-                self.login(profile)
+            if profile.user:
+                if LINKED_ACCOUNTS_ALLOW_LOGIN:
+                    self.login(profile)
             elif LINKED_ACCOUNTS_ALLOW_REGISTRATION:
                 return self.create_user(profile)
             else:
@@ -70,6 +77,15 @@ class AuthCallback(object):
         return self.request.session.get(LINKED_ACCOUNTS_NEXT_KEY, settings.LOGIN_REDIRECT_URL)
 
     def create_user(self, profile):
+        if LINKED_ACCOUNTS_EMAIL_ASSOCIATION:
+            users = list(User.objects.filter(profile.email))
+            if users and len(users) == 1:
+                profile.user = users[0]
+                profile.save()
+                if LINKED_ACCOUNTS_ALLOW_LOGIN:
+                    self.login(profile)
+                return redirect(self.get_next_url())
+
         if LINKED_ACCOUNTS_AUTO_REGISTRATION:
             #no match, create a new user - but there may be duplicate user names.
             from django.contrib.auth.models import User
@@ -84,7 +100,7 @@ class AuthCallback(object):
                     i+=1
             except User.DoesNotExist:
                 #available name!
-                user=User.objects.create_user(username, profile.email)
+                user=User.objects.create_user(username, profile.email or '')
             profile.user = user
             profile.save()
             if LINKED_ACCOUNTS_ALLOW_LOGIN:

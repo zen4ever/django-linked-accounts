@@ -8,6 +8,9 @@ class LinkedAccount(models.Model):
     user = models.ForeignKey('auth.User', null=True)
     api_response = models.TextField(default='', blank=True)
 
+    picture_url = models.URLField(blank=True, verify_exists=False)
+    info_page_url = models.URLField(blank=True, verify_exists=False)
+
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -26,6 +29,13 @@ class LinkedAccount(models.Model):
     @property
     def email(self):
         return self.get_handler().get_email(self)
+
+    @property
+    def emails(self):
+        handler = self.get_handler()
+        if hasattr(handler, 'get_emails'):
+            return handler.get_emails(self)
+        return filter(lambda x: x, [self.email])
 
     class Meta:
         unique_together = ('identifier', 'service')
