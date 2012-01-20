@@ -15,7 +15,7 @@ class LinkedAccountsBackend(object):
         return User.objects.get(id=user_id)
 
     def authenticate(self, service=None, token=None, expires=None):
-        if isinstance(token, basestring):
+        if isinstance(token, basestring) and service in ['facebook', 'google']:
             token = OAuth20Token(token, expires)
         handler = AuthHandler.get_handler(service)
         return handler.get_profile(token)
