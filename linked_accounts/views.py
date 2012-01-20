@@ -1,6 +1,10 @@
+import base64
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.utils import simplejson as json
+from django.utils.crypto import salted_hmac
 
 import django.contrib.auth as auth
 from django.contrib.auth.models import User
@@ -56,10 +60,11 @@ def permute_name(name_string, num):
 
 
 class AuthCallback(object):
-    def __call__(self, request, access, token):
+    def __call__(self, request, access, token, api=False):
         self.access = access
         self.request = request
         self.token = token
+        self.api = api
         profile = None
         if request.user.is_authenticated():
             profile = self.link_profile_to_user()
@@ -75,6 +80,18 @@ class AuthCallback(object):
         return self.success(profile)
 
     def success(self, profile):
+        if self.api:
+            result = {}
+            if profile and profile.user:
+                user_id = profile.user.id
+                result['user_id'] = user_id
+                signature = salted_hmac("linked_accounts.views.login", str(user_id))
+                result['hash'] = base64.encodestring(signature)
+
+            return HttpResponse(
+                json.dumps(result),
+                mimetype="application/json"
+            )
         return redirect(self.get_next_url())
 
     def get_next_url(self):
@@ -161,9 +178,14 @@ def auth_complete(request, service=None):
         request=request,
         redirect=reverse('linked_accounts_complete', args=[service])
     )
-    access_token = oauth_handler.auth_complete()
+    api = False
+    if request.method == 'POST':
+        access_token = request.POST['token']
+        api = True
+    else:
+        access_token = oauth_handler.auth_complete()
     callback = AuthCallback()
-    return callback(request, oauth_handler, access_token)
+    return callback(request, oauth_handler, access_token, api=api)
 
 
 def registration_closed(request, template_name="linked_accounts/registration_closed.html"):
