@@ -60,8 +60,9 @@ class AuthCallback(object):
         self.access = access
         self.request = request
         self.token = token
+        profile = None
         if request.user.is_authenticated():
-            self.link_profile_to_user()
+            profile = self.link_profile_to_user()
         else:
             profile = auth.authenticate(service=access.SERVICE, token=token)
             if profile.user:
@@ -71,10 +72,16 @@ class AuthCallback(object):
                 return self.create_user(profile)
             else:
                 return self.registration_closed()
+        return self.success(profile)
+
+    def success(self, profile):
         return redirect(self.get_next_url())
 
     def get_next_url(self):
-        return self.request.session.get(LINKED_ACCOUNTS_NEXT_KEY, settings.LOGIN_REDIRECT_URL)
+        return self.request.session.get(
+            LINKED_ACCOUNTS_NEXT_KEY,
+            settings.LOGIN_REDIRECT_URL
+        )
 
     def create_user(self, profile):
         if LINKED_ACCOUNTS_EMAIL_ASSOCIATION:
@@ -84,7 +91,7 @@ class AuthCallback(object):
                 profile.save()
                 if LINKED_ACCOUNTS_ALLOW_LOGIN:
                     self.login(profile)
-                return redirect(self.get_next_url())
+                return self.success(profile)
 
         if LINKED_ACCOUNTS_AUTO_REGISTRATION:
             #no match, create a new user - but there may be duplicate user names.
@@ -105,7 +112,7 @@ class AuthCallback(object):
             profile.save()
             if LINKED_ACCOUNTS_ALLOW_LOGIN:
                 self.login(profile)
-            return redirect(self.get_next_url())
+            return self.success(profile)
         else:
             self.request.session[LINKED_ACCOUNTS_ID_SESSION] = profile.id
             return redirect(
@@ -124,6 +131,7 @@ class AuthCallback(object):
         if not profile.user:
             profile.user = self.request.user
             profile.save()
+        return profile
 
 
 def authentication_complete(request, access, token):
