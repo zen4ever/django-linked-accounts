@@ -71,7 +71,6 @@ Default:
           ('twitter', 'linked_accounts.handlers.TwitterHandler'),
           ('google', 'linked_accounts.handlers.GoogleHandler'),
           ('yahoo', 'linked_accounts.handlers.YahooHandler'),
-          ('linkedin', 'linked_accounts.handlers.LinkedInHandler'),
       )
 
 This setting contains a set of classes responsible for retrieving user
@@ -90,6 +89,24 @@ Set this to ``True`` if you want the data stored in
 via OAuth. Keep the default value to only update this data once
 during the first OAuth login for each service.
 
+``LINKED_ACCOUNTS_EMAIL_MATCH``
+-------------------------------
+
+Default: ``True``
+
+Will attempt to look for LinkedAccount on login assuming that email is an
+identifier. Useful when you migrating your authentication system from OpenID,
+because your OpenID identifier will never match your OAuth identifier.
+
+``LINKED_ACCOUNTS_AUTO_REGISTRATION``
+-------------------------------
+
+Default: ``True``
+
+Instead of redirecting to registration form will automatically create a new
+user with suitable username.
+
+
 Login
 =====
 
@@ -100,8 +117,8 @@ login links for each supported service. For example:
 
 .. code-block:: html
 
-  <a href="{% url oauth_access_login "facebook" %}">Sign in with Facebook</a>
-  <a href="{% url oauth_access_login "twitter" %}">Sign in with Twitter</a>
+  <a href="{% url linked_accounts_service_login "facebook" %}">Sign in with Facebook</a>
+  <a href="{% url linked_accounts_service_login "twitter" %}">Sign in with Twitter</a>
 
 The login view also saves the GET parameter ``next`` in a session variable
 that is used to redirect the user after successful OAuth authentication.

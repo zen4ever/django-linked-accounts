@@ -17,18 +17,15 @@ following steps:
 Install Dependencies
 --------------------
 
-Django Linked Accounts depends on Eldarion's `django-oauth-access
-<https://github.com/eldarion/django-oauth-access>`_.
-If you need support for Google Accounts, you will need to install
-`Zen4Ever's fork of django-oauth-access
-<https://github.com/zen4ever/django-oauth-access>`_.
+Django Linked Accounts depends on `django-oauth-flow
+<https://github.com/zen4ever/django-oauth-flow>`_.
 
 You can run the following commands through ``pip install`` to install
 the necessary dependencies:
 
 ::
 
-    -e git://github.com/zen4ever/django-oauth-access.git@google#egg=django-oauth-access
+    -e git://github.com/zen4ever/django-oauth-flow.git#egg=django-oauth-flow
     httplib2>=0.6.0
     oauth2>=1.5.167
 
@@ -51,14 +48,13 @@ You can install the python package with the following:
 Install Django App
 ------------------
 
-Add ``oauth_access`` and ``linked_accounts`` to your ``INSTALLED_APPS``
+Add ``linked_accounts`` to your ``INSTALLED_APPS``
 (``settings.py``):
 
 .. code-block:: python
 
     INSTALLED_APPS = (
         # ...
-        "oauth_access",
         "linked_accounts",
     )
 
@@ -67,14 +63,12 @@ Add ``oauth_access`` and ``linked_accounts`` to your ``INSTALLED_APPS``
 Include URLs
 ------------
 
-Include the URLs for ``oauth_access`` and ``linked_accounts``
-following in your URLconf (``urls.py``):
+Include URLs for ``linked_accounts`` in your URLconf (``urls.py``):
 
 .. code-block:: python
 
     urlpatterns = patterns("",
         # ...
-        url(r"^oauth/", include("oauth_access.urls"))
         url(r"^linked_accounts/", include("linked_accounts.urls"))
     )
 
@@ -109,7 +103,7 @@ Here are some handy reference links to get you started:
 
 - Facebook: `https://developers.facebook.com/apps <hhttps://developers.facebook.com/apps>`_ (click the "Create New App" button...)
 - Twitter: `https://dev.twitter.com/apps/new <https://dev.twitter.com/apps/new>`_
-- Google: `http://code.google.com/apis/base/signup.html <http://code.google.com/apis/base/signup.html>`_
+- Google: `https://code.google.com/apis/console/ <https://code.google.com/apis/console/>`_
 - Yahoo: `https://developer.apps.yahoo.com/wsregapp <https://developer.apps.yahoo.com/wsregapp/>`_
 - LinkedIn: `https://www.linkedin.com/secure/developer <https://www.linkedin.com/secure/developer>`_
 
@@ -119,7 +113,7 @@ Here's an example callback URL for Twitter:
 
 .. code-block:: html
 
-  http://yourdomain.com/oauth/callback/twitter/
+  http://yourdomain.com/linked_accounts/complete/twitter/
 
 .. _add-settings:
 
@@ -135,71 +129,23 @@ you want to support:
 
 .. code-block:: python
 
-    OAUTH_ACCESS_SETTINGS = {
-        'linkedin': {
-            'keys': {
-                'KEY': '',
-                'SECRET': '',
-            },
-            'endpoints': {
-                'request_token': 'https://api.linkedin.com/uas/oauth/requestToken',
-                'access_token': 'https://api.linkedin.com/uas/oauth/accessToken',
-                'authorize': 'https://api.linkedin.com/uas/oauth/authenticate',
-                'callback': 'linked_accounts.views.oauth_access_success',
-                'provider_scope': [],
-            },
+    OAUTH_FLOW_SETTINGS = {
+        'facebook': {
+            'KEY': '',
+            'SECRET': '',
+            'SCOPE': ['email'],
+        },
+        'twitter': {
+            'KEY': '',
+            'SECRET': '',
         },
         'google': {
-            'keys': {
-                'KEY': '',
-                'SECRET': '',
-            },
-            'endpoints': {
-                'request_token': 'https://www.google.com/accounts/OAuthGetRequestToken',
-                'access_token': 'https://www.google.com/accounts/OAuthGetAccessToken',
-                'authorize': 'https://www.google.com/accounts/OAuthAuthorizeToken',
-                'callback': 'linked_accounts.views.oauth_access_success',
-                'provider_scope': ["http://www.google.com/m8/feeds/"],
-            },
+            'KEY': '',
+            'SECRET': '',
+            'SCOPE': ['https://www.googleapis.com/auth/userinfo.profile']
         },
-
         'yahoo': {
-            'keys': {
-                'KEY': '',
-                'SECRET': '',
-            },
-            'endpoints': {
-                'request_token': 'https://api.login.yahoo.com/oauth/v2/get_request_token',
-                'access_token': 'https://api.login.yahoo.com/oauth/v2/get_token',
-                'authorize': 'https://api.login.yahoo.com/oauth/v2/request_auth',
-                'callback': 'linked_accounts.views.oauth_access_success',
-            },
-        },
-
-        'facebook': {
-            'keys': {
-                'KEY': '',
-                'SECRET': '',
-            },
-            'endpoints': {
-                'request_token': 'https://graph.facebook.com/oauth/request_token',
-                'access_token': 'https://graph.facebook.com/oauth/access_token',
-                'authorize': 'https://graph.facebook.com/oauth/authorize',
-                'callback': 'linked_accounts.views.oauth_access_success',
-                'provider_scope': ['email'],
-            },
-        },
-
-        'twitter': {
-            'keys': {
-                'KEY': '',
-                'SECRET': '',
-            },
-            'endpoints': {
-                'request_token': 'https://twitter.com/oauth/request_token',
-                'access_token': 'https://twitter.com/oauth/access_token',
-                'authorize': 'https://twitter.com/oauth/authenticate',
-                'callback': 'linked_accounts.views.oauth_access_success',
-            },
-        },
+            'KEY': '',
+            'SECRET': '',
+        }
     }

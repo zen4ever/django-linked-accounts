@@ -14,7 +14,6 @@ Supported Services
  * Twitter
  * Google
  * Yahoo
- * LinkedIn
 
 Flow
 ====

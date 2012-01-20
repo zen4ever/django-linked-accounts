@@ -4,7 +4,7 @@ from distutils.core import setup
 import os
 
 setup(name='django-linked-accounts',
-      version='1.0',
+      version='2.0',
       description='Link third-party service accounts to Django accounts.',
       author='Andrii Kurinnyi',
       author_email='andrew@zen4ever.com',
