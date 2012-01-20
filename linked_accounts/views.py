@@ -146,7 +146,8 @@ def login(request, service=None, template_name="linked_accounts/login.html"):
         'service': service,
     })
 
-def auth_complete(request, service=None, template_name="linked_accounts/complete.html"):
+
+def auth_complete(request, service=None):
     oauth_handler = get_handler(
         service,
         request=request,
@@ -155,6 +156,7 @@ def auth_complete(request, service=None, template_name="linked_accounts/complete
     access_token = oauth_handler.auth_complete()
     callback = AuthCallback()
     return callback(request, oauth_handler, access_token)
+
 
 def registration_closed(request, template_name="linked_accounts/registration_closed.html"):
     return render(request, template_name)
