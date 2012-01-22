@@ -18,17 +18,19 @@ class HMACAuth(object):
 
     def is_authenticated(self, request):
         user_id, signature = self.process_request(request)
-        digest = base64.decodestring(signature)
-        check_digest = salted_hmac("linked_accounts.views.login", str(user_id))
-        if not constant_time_compare(digest, check_digest):
-            return False
 
-        try:
-            user = User.objects.get(id=user_id)
-            if user.is_active:
-                request.user = user
-        except User.DoesNotExist:
-            pass
+        if user_id and signature:
+            digest = base64.decodestring(signature)
+            check_digest = salted_hmac("linked_accounts.views.login", str(user_id))
+            if not constant_time_compare(digest, check_digest):
+                return False
+
+            try:
+                user = User.objects.get(id=user_id)
+                if user.is_active:
+                    request.user = user
+            except User.DoesNotExist:
+                pass
 
         return False
 
