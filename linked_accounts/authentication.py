@@ -17,6 +17,8 @@ class HMACAuth(object):
         return user_id, signature
 
     def is_authenticated(self, request):
+        if request.user.is_authenticated():
+            return True
         user_id, signature = self.process_request(request)
 
         if user_id and signature:
