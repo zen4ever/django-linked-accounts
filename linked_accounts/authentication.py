@@ -27,6 +27,7 @@ class HMACAuth(object):
                 user = User.objects.get(id=user_id)
                 if user.is_active:
                     request.user = user
+                    return True
             except User.DoesNotExist:
                 pass
 
