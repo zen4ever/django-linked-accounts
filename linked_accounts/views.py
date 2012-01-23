@@ -1,4 +1,3 @@
-import base64
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -87,7 +86,7 @@ class AuthCallback(object):
                 user_id = profile.user.id
                 result['user_id'] = user_id
                 signature = salted_hmac("linked_accounts.views.login", str(user_id)).hexdigest()
-                result['hash'] = base64.encodestring(signature)
+                result['hash'] = signature
 
             return HttpResponse(
                 json.dumps(result),

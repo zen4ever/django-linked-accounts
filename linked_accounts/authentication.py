@@ -1,4 +1,3 @@
-import base64
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.crypto import salted_hmac, constant_time_compare
@@ -17,14 +16,11 @@ class HMACAuth(object):
         return user_id, signature
 
     def is_authenticated(self, request):
-        if request.user.is_authenticated():
-            return True
         user_id, signature = self.process_request(request)
 
         if user_id and signature:
-            digest = base64.decodestring(signature)
             check_digest = salted_hmac("linked_accounts.views.login", str(user_id)).hexdigest()
-            if not constant_time_compare(digest, check_digest):
+            if not constant_time_compare(signature, check_digest):
                 return False
 
             try:
