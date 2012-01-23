@@ -23,7 +23,7 @@ class HMACAuth(object):
 
         if user_id and signature:
             digest = base64.decodestring(signature)
-            check_digest = salted_hmac("linked_accounts.views.login", str(user_id))
+            check_digest = salted_hmac("linked_accounts.views.login", str(user_id)).hexdigest()
             if not constant_time_compare(digest, check_digest):
                 return False
 

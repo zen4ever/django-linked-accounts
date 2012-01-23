@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import simplejson as json
 from django.utils.crypto import salted_hmac
+from django.views.decorators.csrf import csrf_exempt
 
 import django.contrib.auth as auth
 from django.contrib.auth.models import User
@@ -85,7 +86,7 @@ class AuthCallback(object):
             if profile and profile.user:
                 user_id = profile.user.id
                 result['user_id'] = user_id
-                signature = salted_hmac("linked_accounts.views.login", str(user_id))
+                signature = salted_hmac("linked_accounts.views.login", str(user_id)).hexdigest()
                 result['hash'] = base64.encodestring(signature)
 
             return HttpResponse(
@@ -172,6 +173,7 @@ def login(request, service=None, template_name="linked_accounts/login.html"):
     })
 
 
+@csrf_exempt
 def auth_complete(request, service=None):
     oauth_handler = get_handler(
         service,
@@ -180,7 +182,8 @@ def auth_complete(request, service=None):
     )
     api = False
     if request.method == 'POST':
-        access_token = request.POST['token']
+        data = json.loads(request.raw_post_data)
+        access_token = data['token']
         api = True
     else:
         access_token = oauth_handler.auth_complete()
