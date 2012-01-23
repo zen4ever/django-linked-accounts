@@ -12,8 +12,8 @@ class HMACAuth(object):
         self.realm = realm
 
     def process_request(self, request):
-        user_id = request.META.get('LA_USER_ID', None)
-        signature = request.META.get('LA_HASH', None)
+        user_id = request.META.get('HTTP_X_LA_USER_ID', None)
+        signature = request.META.get('HTTP_X_LA_HASH', None)
         return user_id, signature
 
     def is_authenticated(self, request):
