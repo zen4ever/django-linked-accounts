@@ -9,9 +9,10 @@ from django.views.decorators.csrf import csrf_exempt
 import django.contrib.auth as auth
 from django.contrib.auth.models import User
 
-from linked_accounts.models import LinkedAccount
-from linked_accounts.handlers import AuthHandler
 from linked_accounts.forms import RegisterForm
+from linked_accounts.handlers import AuthHandler
+from linked_accounts.models import LinkedAccount
+from linked_accounts.signals import login_successful
 
 from oauth_flow.handlers import get_handler
 
@@ -92,6 +93,7 @@ class AuthCallback(object):
                 json.dumps(result),
                 mimetype="application/json"
             )
+        login_successful.send(sender=LinkedAccount, profile=profile)
         return redirect(self.get_next_url())
 
     def get_next_url(self):
