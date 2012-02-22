@@ -111,7 +111,8 @@ class AuthCallback(object):
         if LINKED_ACCOUNTS_EMAIL_ASSOCIATION and profile.email:
             users = list(User.objects.filter(email=profile.email))
             if users and len(users) == 1:
-                profile.user = users[0]
+                user = users[0]
+                profile.user = user
                 profile.save()
                 if LINKED_ACCOUNTS_ALLOW_LOGIN:
                     self.login(profile)
@@ -120,8 +121,8 @@ class AuthCallback(object):
         if LINKED_ACCOUNTS_AUTO_REGISTRATION:
             #no match, create a new user - but there may be duplicate user names.
             nickname = profile.username
-            username=nickname
-            user=None
+            username = nickname
+            user = None
             try:
                 i=0
                 while True:
@@ -130,7 +131,8 @@ class AuthCallback(object):
                     i+=1
             except User.DoesNotExist:
                 #available name!
-                user=User.objects.create_user(username, profile.email or '')
+                user = User.objects.create_user(username, profile.email or '')
+
             profile.user = user
             profile.save()
             if LINKED_ACCOUNTS_ALLOW_LOGIN:

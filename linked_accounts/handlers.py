@@ -130,6 +130,16 @@ class AuthHandler(object):
         return data.get("email", None)
 
     @classmethod
+    def get_first_name(self, profile):
+        data = self.get_data(profile)
+        return data.get(self.first_name, '')
+
+    @classmethod
+    def get_last_name(self, profile):
+        data = self.get_data(profile)
+        return data.get(self.last_name, '')
+
+    @classmethod
     def get_username(self, profile):
         raise NotImplemented()
 
@@ -151,6 +161,28 @@ class TwitterHandler(AuthHandler):
     picture_name = 'profile_image_url'
 
     @classmethod
+    def get_first_name(self, profile):
+        data = self.get_data(profile)
+        name = data.get('name', '')
+        parts = name.split(' ')
+        if len(parts) == 2:
+            return parts[0]
+        elif len(parts) > 2:
+            return " ".join(parts[:-1])
+        return name
+
+    @classmethod
+    def get_last_name(self, profile):
+        data = self.get_data(profile)
+        name = data.get('name', '')
+        parts = name.split(' ')
+        if len(parts) == 2:
+            return parts[1]
+        elif len(parts) > 2:
+            return parts[-1]
+        return ''
+
+    @classmethod
     def get_info_page_url(self, profile):
         data = self.get_data(profile)
         return "https://twitter.com/" + data[self.identifier_name]
@@ -165,6 +197,8 @@ class FacebookHandler(AuthHandler):
     service = "facebook"
     profile_url = "https://graph.facebook.com/me"
     identifier_name = "id"
+    first_name = 'first_name'
+    last_name = 'last_name'
 
     @classmethod
     def get_picture_url(self, profile):
@@ -182,6 +216,8 @@ class GoogleHandler(AuthHandler):
     profile_url = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json"
     identifier_name = "id"
     picture_name = 'picture'
+    first_name = 'given_name'
+    last_name = 'family_name'
 
     @classmethod
     def get_username(self, profile):
@@ -194,6 +230,8 @@ class YahooHandler(AuthHandler):
     profile_url = "http://social.yahooapis.com/v1/me/guid?format=json"
     identifier_name = ["guid", "value"]
     info_page_name = "profileUrl"
+    first_name = 'givenName'
+    last_name = 'familyName'
 
     @classmethod
     def get_picture_url(self, profile):
@@ -240,6 +278,8 @@ class LinkedInHandler(AuthHandler):
     identifier_name = "id"
     picture_name = 'picture-url'
     info_page_name = 'public-profile-url'
+    first_name = 'firstName'
+    last_name = 'lastName'
 
     @classmethod
     def get_username(self, profile):
