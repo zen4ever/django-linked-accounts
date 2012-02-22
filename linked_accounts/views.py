@@ -108,7 +108,7 @@ class AuthCallback(object):
         )
 
     def create_user(self, profile):
-        if LINKED_ACCOUNTS_EMAIL_ASSOCIATION:
+        if LINKED_ACCOUNTS_EMAIL_ASSOCIATION and profile.email:
             users = list(User.objects.filter(email=profile.email))
             if users and len(users) == 1:
                 profile.user = users[0]
