@@ -81,6 +81,7 @@ class AuthCallback(object):
         return self.success(profile)
 
     def success(self, profile):
+        login_successful.send(sender=LinkedAccount, profile=profile)
         if self.api:
             result = {}
             if profile and profile.user:
@@ -93,7 +94,6 @@ class AuthCallback(object):
                 json.dumps(result),
                 mimetype="application/json"
             )
-        login_successful.send(sender=LinkedAccount, profile=profile)
         return redirect(self.get_next_url())
 
     def get_next_url(self):
