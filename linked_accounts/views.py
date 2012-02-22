@@ -67,7 +67,12 @@ class AuthCallback(object):
         self.token = token
         self.api = api
         profile = None
-        if request.user.is_authenticated():
+        user = None
+        try:
+            user = request.user
+        except User.DoesNotExist:
+            pass
+        if user and user.is_authenticated():
             profile = self.link_profile_to_user()
         else:
             profile = auth.authenticate(service=access.SERVICE, token=token)
@@ -104,7 +109,7 @@ class AuthCallback(object):
 
     def create_user(self, profile):
         if LINKED_ACCOUNTS_EMAIL_ASSOCIATION:
-            users = list(User.objects.filter(profile.email))
+            users = list(User.objects.filter(email=profile.email))
             if users and len(users) == 1:
                 profile.user = users[0]
                 profile.save()
@@ -114,7 +119,6 @@ class AuthCallback(object):
 
         if LINKED_ACCOUNTS_AUTO_REGISTRATION:
             #no match, create a new user - but there may be duplicate user names.
-            from django.contrib.auth.models import User
             nickname = profile.username
             username=nickname
             user=None
