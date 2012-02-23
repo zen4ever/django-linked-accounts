@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db import transaction
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -15,6 +16,11 @@ from linked_accounts.models import LinkedAccount
 from linked_accounts.signals import login_successful
 
 from oauth_flow.handlers import get_handler
+
+try:
+    from linked_accounts.utils import create_email
+except ImportError:
+    create_email = lambda x: None
 
 
 LINKED_ACCOUNTS_ID_SESSION = getattr(
@@ -114,6 +120,7 @@ class AuthCallback(object):
                 user = users[0]
                 profile.user = user
                 profile.save()
+                create_email(user)
                 if LINKED_ACCOUNTS_ALLOW_LOGIN:
                     self.login(profile)
                 return self.success(profile)
@@ -132,6 +139,7 @@ class AuthCallback(object):
             except User.DoesNotExist:
                 #available name!
                 user = User.objects.create_user(username, profile.email or '')
+                create_email(user)
 
             profile.user = user
             profile.save()
@@ -180,6 +188,7 @@ def login(request, service=None, template_name="linked_accounts/login.html"):
     })
 
 
+@transaction.commit_on_success
 @csrf_exempt
 def auth_complete(request, service=None):
     oauth_handler = get_handler(
@@ -226,6 +235,7 @@ def register(request, form_class=RegisterForm, template_name="linked_accounts/re
 
         if form.is_valid():
             user = form.save(profile)
+            create_email(user)
             user.backend = "linked_accounts.backends.LinkedAccountsBackend"
             auth.login(request, user)
             return redirect(next_url)
