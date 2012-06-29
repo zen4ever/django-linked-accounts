@@ -100,6 +100,7 @@ class AuthCallback(object):
                 result['user_id'] = user_id
                 signature = salted_hmac("linked_accounts.views.login", str(user_id)).hexdigest()
                 result['hash'] = signature
+                result['username'] = profile.user.username
 
             return HttpResponse(
                 json.dumps(result),
