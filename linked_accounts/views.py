@@ -15,7 +15,7 @@ from linked_accounts.handlers import AuthHandler
 from linked_accounts.models import LinkedAccount
 from linked_accounts.signals import login_successful
 
-from oauth_flow.handlers import get_handler
+from linked_accounts import get_oauth_handler
 
 try:
     from linked_accounts.utils import create_email
@@ -177,7 +177,7 @@ def login(request, service=None, template_name="linked_accounts/login.html"):
     next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
     request.session[LINKED_ACCOUNTS_NEXT_KEY] = next_url
     if service:
-        oauth_handler = get_handler(
+        oauth_handler = get_oauth_handler(
             service,
             request=request,
             redirect=reverse('linked_accounts_complete', args=[service])
@@ -192,7 +192,7 @@ def login(request, service=None, template_name="linked_accounts/login.html"):
 @transaction.commit_on_success
 @csrf_exempt
 def auth_complete(request, service=None):
-    oauth_handler = get_handler(
+    oauth_handler = get_oauth_handler(
         service,
         request=request,
         redirect=reverse('linked_accounts_complete', args=[service])

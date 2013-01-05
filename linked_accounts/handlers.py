@@ -3,6 +3,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils import simplejson as json
 from django.utils.importlib import import_module
 
+from linked_accounts import get_oauth_handler
+
 
 LINKED_ACCOUNTS_HANDLERS = (
     ('facebook', 'linked_accounts.handlers.FacebookHandler'),
@@ -40,8 +42,7 @@ class AuthHandler(object):
 
     @classmethod
     def get_access(self, **kwargs):
-        from oauth_flow.handlers import get_handler
-        oauth_handler = get_handler(self.service, **kwargs)
+        oauth_handler = get_oauth_handler(self.service, **kwargs)
         return oauth_handler
 
     @classmethod
