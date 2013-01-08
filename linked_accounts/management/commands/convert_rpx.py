@@ -1,4 +1,4 @@
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import NoArgsCommand
 from linked_accounts.models import LinkedAccount
 
 
@@ -19,10 +19,12 @@ class Command(NoArgsCommand):
             elif rpx.provider == 'Yahoo!':
                 identifier = rpx.user.email
             if identifier:
-                linked_account, created = LinkedAccount.objects.get_or_create(
-                    identifier=identifier,
-                    service=rpx.provider.lower().replace('!', ''),
-                    user=rpx.user,
-                    picture_url=rpx.profile_pic_url,
-                    info_page_url=rpx.info_page_url
-                )
+                service = rpx.provider.lower().replace('!', '')
+                if not LinkedAccount.objects.filter(identifier=identifier, service=service).exists():
+                    linked_account, created = LinkedAccount.objects.get_or_create(
+                        identifier=identifier,
+                        service=service,
+                        user=rpx.user,
+                        picture_url=rpx.profile_pic_url,
+                        info_page_url=rpx.info_page_url
+                    )
