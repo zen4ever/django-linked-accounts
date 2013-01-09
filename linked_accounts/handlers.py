@@ -157,7 +157,7 @@ class AuthHandler(object):
 
 class TwitterHandler(AuthHandler):
     service = "twitter"
-    profile_url = "https://twitter.com/account/verify_credentials.json"
+    profile_url = "https://api.twitter.com/1.1/account/verify_credentials.json"
     identifier_name = "screen_name"
     picture_name = 'profile_image_url'
 
