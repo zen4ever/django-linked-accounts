@@ -19,7 +19,6 @@ setup(name='django-linked-accounts',
           'Operating System :: OS Independent',
           'Framework :: Django',
       ],
-      requires=['oauth-flow'],
       long_description=open(
           os.path.join(os.path.dirname(__file__), 'README.rst'),
       ).read().strip(),
