@@ -9,3 +9,9 @@ to other third-party service accounts including:
  * Google
  * Yahoo
  * LinkedIn
+
+This package requires::
+
+  oauth-flow
+  httplib2
+  oauth2
