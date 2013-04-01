@@ -7,6 +7,8 @@ from django.utils import simplejson as json
 from django.utils.crypto import salted_hmac
 from django.views.decorators.csrf import csrf_exempt
 
+from django.contrib.auth import messages
+
 import django.contrib.auth as auth
 from django.contrib.auth.models import User
 
@@ -198,6 +200,16 @@ def auth_complete(request, service=None):
         redirect=reverse('linked_accounts_complete', args=[service])
     )
     api = False
+    access_denied = (
+        ('error' in request.REQUEST) and (request.REQUEST['error'] == 'access_denied')
+    ) or (
+        ('denied' in request.REQUEST) and (service == 'twitter')
+    )
+
+    if access_denied:
+        messages.warning(request, "Access to %s account was denied by user" % service.capitalize())
+        return redirect(settings.LOGIN_REDIRECT_URL)
+
     if request.method == 'POST':
         data = json.loads(request.raw_post_data)
         access_token = data['token']
