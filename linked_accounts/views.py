@@ -7,7 +7,7 @@ from django.utils import simplejson as json
 from django.utils.crypto import salted_hmac
 from django.views.decorators.csrf import csrf_exempt
 
-from django.contrib.auth import messages
+from django.contrib import messages
 
 import django.contrib.auth as auth
 from django.contrib.auth.models import User
