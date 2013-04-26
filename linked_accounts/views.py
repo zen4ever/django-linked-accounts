@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
 import django.contrib.auth as auth
-from django.contrib.auth.models import User
 
 from linked_accounts.forms import RegisterForm
 from linked_accounts.handlers import AuthHandler
@@ -23,6 +22,8 @@ try:
     from linked_accounts.utils import create_email
 except ImportError:
     create_email = lambda x: None
+
+User = auth.get_user_model()
 
 
 LINKED_ACCOUNTS_ID_SESSION = getattr(
@@ -102,7 +103,7 @@ class AuthCallback(object):
                 result['user_id'] = user_id
                 signature = salted_hmac("linked_accounts.views.login", str(user_id)).hexdigest()
                 result['hash'] = signature
-                result['username'] = profile.user.username
+                result[User.USERNAME_FIELD] = getattr(profile.user, User.USERNAME_FIELD)
 
             return HttpResponse(
                 json.dumps(result),
@@ -115,6 +116,28 @@ class AuthCallback(object):
             LINKED_ACCOUNTS_NEXT_KEY,
             settings.LOGIN_REDIRECT_URL
         )
+
+    def auto_registration(self, profile):
+        #no match, create a new user - but there may be duplicate user names.
+        nickname = profile.username
+        username = nickname
+        user = None
+        try:
+            i=0
+            while True:
+                User.objects.get(username=username)
+                username=permute_name(nickname, i)
+                i+=1
+        except User.DoesNotExist:
+            #available name!
+            user = User.objects.create_user(username, profile.email or '')
+            create_email(user)
+
+        profile.user = user
+        profile.save()
+        if LINKED_ACCOUNTS_ALLOW_LOGIN:
+            self.login(profile)
+        return self.success(profile)
 
     def create_user(self, profile):
         if LINKED_ACCOUNTS_EMAIL_ASSOCIATION and profile.email:
@@ -129,26 +152,7 @@ class AuthCallback(object):
                 return self.success(profile)
 
         if LINKED_ACCOUNTS_AUTO_REGISTRATION:
-            #no match, create a new user - but there may be duplicate user names.
-            nickname = profile.username
-            username = nickname
-            user = None
-            try:
-                i=0
-                while True:
-                    User.objects.get(username=username)
-                    username=permute_name(nickname, i)
-                    i+=1
-            except User.DoesNotExist:
-                #available name!
-                user = User.objects.create_user(username, profile.email or '')
-                create_email(user)
-
-            profile.user = user
-            profile.save()
-            if LINKED_ACCOUNTS_ALLOW_LOGIN:
-                self.login(profile)
-            return self.success(profile)
+            return self.auto_registration(profile)
         else:
             self.request.session[LINKED_ACCOUNTS_ID_SESSION] = profile.id
             return redirect(
@@ -178,11 +182,25 @@ def authentication_complete(request, access, token):
 def login(request, service=None, template_name="linked_accounts/login.html"):
     next_url = request.REQUEST.get('next', settings.LOGIN_REDIRECT_URL)
     request.session[LINKED_ACCOUNTS_NEXT_KEY] = next_url
+    # hint for Google which account to use
+    # see http://stackoverflow.com/questions/12506380/google-oauth-login-avoid-asking-the-user-to-choose-which-account-to-use
+    user_id = request.REQUEST.get('user_id', '')
+    hd = request.REQUEST.get('hd', '')
+    kwargs = {}
     if service:
+        if service == 'google':
+            extra_args = {}
+            if user_id:
+                extra_args['user_id'] = user_id
+            if hd:
+                extra_args['hd'] = hd
+            if extra_args:
+                kwargs['extra_settings'] = {'EXTRA_ARGUMENTS': extra_args}
         oauth_handler = get_oauth_handler(
             service,
             request=request,
-            redirect=reverse('linked_accounts_complete', args=[service])
+            redirect=reverse('linked_accounts_complete', args=[service]),
+            **kwargs
         )
         return redirect(oauth_handler.auth_url())
     return render(request, template_name, {

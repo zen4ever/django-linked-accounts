@@ -1,17 +1,19 @@
 from django.db import models
 from django.utils import simplejson as json
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class LinkedAccount(models.Model):
     identifier = models.CharField(max_length=255, db_index=True)
     service = models.CharField(max_length=255, db_index=True)
-    user = models.ForeignKey('auth.User', null=True)
+    user = models.ForeignKey(User, null=True)
     api_response = models.TextField(default='', blank=True)
 
-    picture_url = models.URLField(blank=True, verify_exists=False)
-    info_page_url = models.URLField(blank=True, verify_exists=False)
+    picture_url = models.URLField(blank=True)
+    info_page_url = models.URLField(blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

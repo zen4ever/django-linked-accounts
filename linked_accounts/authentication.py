@@ -2,8 +2,9 @@ from django.http import HttpResponse
 from django.template import loader
 from django.utils.crypto import salted_hmac, constant_time_compare
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class HMACAuth(object):
 

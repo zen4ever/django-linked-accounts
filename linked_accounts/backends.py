@@ -1,8 +1,10 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from linked_accounts.handlers import AuthHandler
 
 from oauth_flow.handlers import OAuth20Token
+
+User = get_user_model()
 
 
 class LinkedAccountsBackend(object):
