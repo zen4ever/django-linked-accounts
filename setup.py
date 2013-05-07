@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 import os
 
 setup(name='django-linked-accounts',
-      version='2.2',
+      version='2.2.1',
       description='Link third-party service accounts to Django accounts.',
       author='Andrii Kurinnyi',
       author_email='andrew@zen4ever.com',
